@@ -9,3 +9,6 @@ cdk.out
 
 # NodeJS
 .env
+
+# Bot Code
+!bot.js
