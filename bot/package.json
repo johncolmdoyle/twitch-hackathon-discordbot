@@ -1,0 +1,17 @@
+{
+  "name": "twitch-discord-bot",
+  "version": "1.0.0",
+  "description": "React to Twitch Channel Points and trigger changes in Discord",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node ./src/bot.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./src/bot.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0"
+  }
+}
