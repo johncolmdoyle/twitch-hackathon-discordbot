@@ -18,7 +18,7 @@ The aim is to allow a broadcaster to configure channel points that interact with
 * The DynamoDB table streams the data to the Discord Bot
 * The Discord Bot finds the user based on the input from the reward and adds the user to the reward's role
 
-## Un-Happy Path (Red Path)
+### Un-Happy Path (Red Path)
 
 Description: When there is an issue with identifying the user within Discord. I.e. the user was not found.
 
