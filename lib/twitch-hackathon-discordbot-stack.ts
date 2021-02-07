@@ -1,18 +1,75 @@
-import * as sns from '@aws-cdk/aws-sns';
-import * as subs from '@aws-cdk/aws-sns-subscriptions';
-import * as sqs from '@aws-cdk/aws-sqs';
 import * as cdk from '@aws-cdk/core';
+import * as dynamodb from '@aws-cdk/aws-dynamodb';
+import * as lambda from '@aws-cdk/aws-lambda';
+import * as apigateway from '@aws-cdk/aws-apigateway';
 
 export class TwitchHackathonDiscordbotStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const queue = new sqs.Queue(this, 'TwitchHackathonDiscordbotQueue', {
-      visibilityTimeout: cdk.Duration.seconds(300)
+    const dyanmodbPrimaryKeyName = 'id';
+
+
+    // DYNAMODB TABLE
+    const eventTable = new dynamodb.Table(this, "eventTable", {
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      partitionKey: { name: dyanmodbPrimaryKeyName, type: dynamodb.AttributeType.STRING },
+      timeToLiveAttribute: 'ttl',
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      stream: dynamodb.StreamViewType.NEW_IMAGE
     });
 
-    const topic = new sns.Topic(this, 'TwitchHackathonDiscordbotTopic');
+    // NODE LAMBDA
+    const etlLambda = new lambda.Function(this, 'etlFunction', {
+      code: new lambda.AssetCode('etl'),
+      handler: 'etl.handler',
+      runtime: lambda.Runtime.NODEJS_10_X,
+      environment: {
+        TABLE_NAME: eventTable.tableName,
+        PRIMARY_KEY: dyanmodbPrimaryKeyName
+      }
+    });
 
-    topic.addSubscription(new subs.SqsSubscription(queue));
+    // LAMBDA PERMISSIONS
+    eventTable.grantWriteData(etlLambda);
+
+    // API GATEWAY
+    const api = new apigateway.RestApi(this, 'twitchEventSub', {
+      restApiName: 'API Twitch Hackathon',
+    });
+
+    const events = api.root.addResource('events');
+
+    const etlIntegration = new apigateway.LambdaIntegration(etlLambda);
+    const createEventMethod = events.addMethod('POST', etlIntegration, {});
+    addCorsOptions(events);
   }
+}
+
+export function addCorsOptions(apiResource: apigateway.IResource) {
+  apiResource.addMethod('OPTIONS', new apigateway.MockIntegration({
+    integrationResponses: [{
+      statusCode: '200',
+      responseParameters: {
+        'method.response.header.Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+        'method.response.header.Access-Control-Allow-Origin': "'*'",
+        'method.response.header.Access-Control-Allow-Credentials': "'false'",
+        'method.response.header.Access-Control-Allow-Methods': "'OPTIONS,GET,PUT,POST,DELETE'",
+      },
+    }],
+    passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+    requestTemplates: {
+      "application/json": "{\"statusCode\": 200}"
+    },
+  }), {
+    methodResponses: [{
+      statusCode: '200',
+      responseParameters: {
+        'method.response.header.Access-Control-Allow-Headers': true,
+        'method.response.header.Access-Control-Allow-Methods': true,
+        'method.response.header.Access-Control-Allow-Credentials': true,
+        'method.response.header.Access-Control-Allow-Origin': true,
+      },
+    }]
+  })
 }

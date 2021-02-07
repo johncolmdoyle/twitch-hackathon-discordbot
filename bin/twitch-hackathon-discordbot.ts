@@ -4,3 +4,4 @@ import { TwitchHackathonDiscordbotStack } from '../lib/twitch-hackathon-discordb
 
 const app = new cdk.App();
 new TwitchHackathonDiscordbotStack(app, 'TwitchHackathonDiscordbotStack');
+cdk.Tags.of(app).add("app", "twitch-hackathon");
