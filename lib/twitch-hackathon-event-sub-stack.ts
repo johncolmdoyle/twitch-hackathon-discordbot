@@ -4,15 +4,19 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import * as apigateway from '@aws-cdk/aws-apigateway';
 import * as acm from '@aws-cdk/aws-certificatemanager';
 
-interface PubSubStackProps extends cdk.StackProps {
+interface EventSubStackProps extends cdk.StackProps {
   readonly domainName: string;
   readonly subDomainName: string;
   readonly certificate: acm.ICertificate;
   readonly env: any;
+  readonly twitchCallback: string;
+  readonly twitchClientId: string;
+  readonly twitchClientSecret: string;
+  readonly twitchEventSubSecret: string;
 }
 
-export class PubSubStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props: PubSubStackProps) {
+export class EventSubStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: EventSubStackProps) {
     super(scope, id, props);
 
     const dyanmodbPrimaryKeyName = 'id';
@@ -33,7 +37,11 @@ export class PubSubStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_10_X,
       environment: {
         TABLE_NAME: eventTable.tableName,
-        PRIMARY_KEY: dyanmodbPrimaryKeyName
+        PRIMARY_KEY: dyanmodbPrimaryKeyName,
+        callback: props.twitchCallback,
+        clientId: props.twitchClientId,
+        clientSecret: props.twitchClientSecret,
+        eventSubSecret: props.twitchEventSubSecret
       }
     });
 
