@@ -2,13 +2,20 @@ import * as cdk from '@aws-cdk/core';
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as apigateway from '@aws-cdk/aws-apigateway';
+import * as acm from '@aws-cdk/aws-certificatemanager';
 
-export class TwitchHackathonDiscordbotStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+interface PubSubStackProps extends cdk.StackProps {
+  readonly domainName: string;
+  readonly subDomainName: string;
+  readonly certificate: acm.ICertificate;
+  readonly env: any;
+}
+
+export class PubSubStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: PubSubStackProps) {
     super(scope, id, props);
 
     const dyanmodbPrimaryKeyName = 'id';
-
 
     // DYNAMODB TABLE
     const eventTable = new dynamodb.Table(this, "eventTable", {
