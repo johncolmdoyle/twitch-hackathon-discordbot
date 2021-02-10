@@ -96,16 +96,35 @@
           <div class="row mb-4" id="discordRoleReward1">
             <div class="col">
               <div class="form-outline">
-                <input type="text" id="discordRoleName1" class="form-control" />
-                <label class="form-label" for="discordRoleName1">Role Name</label>
-              </div>
-            </div>
-            <div class="col">
-              <div class="form-outline">
                 <input type="text" id="twitchRewardId1" class="form-control" />
                 <label class="form-label" for="twitchRewardId1">Channel Points Reward Id</label>
               </div>
             </div>
+            <div class="col">
+              <div class="form-outline">
+                <input type="text" id="twitchRewardCost1" class="form-control" />
+                <label class="form-label" for="twitchRewardCost1">Channel Points Cost</label>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-outline">
+                <input type="text" id="twitchRewardTitle1" class="form-control" />
+                <label class="form-label" for="twitchRewardTitle1">Channel Points Title</label>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-outline">
+                <input type="text" id="twitchRewardPrompt1" class="form-control" />
+                <label class="form-label" for="twitchRewardPrompt1">Channel Points Prompt</label>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-outline">
+                <input type="text" id="discordRoleName1" class="form-control" />
+                <label class="form-label" for="discordRoleName1">Discord Role Name</label>
+              </div>
+            </div>
+
           </div>
         </div>
         <!-- Submit button -->
@@ -178,7 +197,7 @@
     $("#savedSuccess").hide();
 
     var client_id = 'f1g960pkimfxyugtmaoaztwxrx3df5';
-    var redirect = 'http://localhost/'; //'https://twitch-hackathon.gizmo.codes/';
+    var redirect = 'https://twitch-hackathon.gizmo.codes/';
     var rewardCount = 1;
 
     if (document.location.hash && document.location.hash != '' && window.location.hash.substr(1)) {
@@ -212,12 +231,26 @@
       rewardCount++;
       var baseReward = $('#discordRoleReward1').clone();
       baseReward.attr("id", "discordRoleReward" + rewardCount);
+
       baseReward.find("#discordRoleName1").attr("id", "discordRoleName" + rewardCount);
       baseReward.find("#discordRoleName" + rewardCount).val("");
       baseReward.find("#discordRoleName" + rewardCount).next().attr("for", "discordRoleName" + rewardCount);
+
       baseReward.find("#twitchRewardId1").attr("id", "twitchRewardId" + rewardCount);
       baseReward.find("#twitchRewardId" + rewardCount).val("");
       baseReward.find("#twitchRewardId" + rewardCount).next().attr("for", "twitchRewardId" + rewardCount);
+
+      baseReward.find("#twitchRewardCost1").attr("id", "twitchRewardCost" + rewardCount);
+      baseReward.find("#twitchRewardCost" + rewardCount).val("");
+      baseReward.find("#twitchRewardCost" + rewardCount).next().attr("for", "twitchRewardCost" + rewardCount);
+
+      baseReward.find("#twitchRewardTitle1").attr("id", "twitchRewardTitle" + rewardCount);
+      baseReward.find("#twitchRewardTitle" + rewardCount).val("");
+      baseReward.find("#twitchRewardTitle" + rewardCount).next().attr("for", "twitchRewardTitle" + rewardCount);
+
+      baseReward.find("#twitchRewardPrompt1").attr("id", "twitchRewardPrompt" + rewardCount);
+      baseReward.find("#twitchRewardPrompt" + rewardCount).val("");
+      baseReward.find("#twitchRewardPrompt" + rewardCount).next().attr("for", "twitchRewardPrompt" + rewardCount);
 
       $('#rewardRoleList').append(baseReward);
     });
@@ -248,16 +281,20 @@
 
       var rewardList = [];
 
-      for (var i = 0; i < rewardCount; i++) {
+      for (var i = 1; i <= rewardCount; i++) {
         var rewardOption = {};
-        rewardOption['discordRoleName'] = $("#discordRoleName" + i).val();
-        rewardOption['twitchRewardId'] = $("#twitchRewardId" + i).val();
+        rewardOption['id'] = $("#twitchRewardId" + i).val();
+        rewardOption['discordRole'] = $("#discordRoleName" + i).val();
+        rewardOption['cost'] = $("#twitchRewardCost" + i).val();
+        rewardOption['title'] = $("#twitchRewardTitle" + i).val();
+        rewardOption['prompt'] = $("#twitchRewardPrompt" + i).val();
         rewardList.push(rewardOption);
       }
       postData('https://twitch-hackathon-api.gizmo.codes/subscriptions', { 
         type: 'subscribe', 
         broadcasterUserId: $('#twitchBroadcasterID').text(), 
         twitchChannelName: $('#twitchChannelNameLink').text(),
+        discordBotToken: $("#discordBotToken").val(),
         rewards: rewardList
         })
           .then(data => {

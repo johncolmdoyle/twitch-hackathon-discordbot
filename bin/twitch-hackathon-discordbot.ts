@@ -31,6 +31,7 @@ new EventSubStack(app, 'twitch-hackathon-event-sub', {
     eventTablePK: dynamodbStack.eventTablePK,
     subscriberTable: dynamodbStack.subscriberTable,
     subscriberTablePK: dynamodbStack.subscriberTablePK,
+    subscriberTableSK: dynamodbStack.subscriberTableSK,
     domainName: domainName,
     subDomainName: apiSubDomain,
     certificate: certifcate.apiCert,

@@ -18,6 +18,7 @@ interface EventSubStackProps extends cdk.StackProps {
   readonly eventTablePK: string;
   readonly subscriberTable: dynamodb.ITable;
   readonly subscriberTablePK: string;
+  readonly subscriberTableSK: string;
 }
 
 export class EventSubStack extends cdk.Stack {
@@ -55,6 +56,7 @@ export class EventSubStack extends cdk.Stack {
       environment: {
         TABLE_NAME: props.subscriberTable.tableName,
         PRIMARY_KEY: props.subscriberTablePK,
+        SORT_KEY: props.subscriberTableSK,
         TWITCH_CLIENT_ID: props.twitchClientId,
         TWITCH_CLIENT_SECRET: props.twitchClientSecret,
         TWITCH_EVENT_SUB_SECRET: props.twitchEventSubSecret,

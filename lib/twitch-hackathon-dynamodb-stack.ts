@@ -11,12 +11,14 @@ export class DynamoDBStack extends cdk.Stack {
 
   public readonly subscriberTable: dynamodb.ITable;
   public readonly subscriberTablePK: string;
+  public readonly subscriberTableSK: string;
 
   constructor(scope: cdk.Construct, id: string, props: DynamoDBStackProps) {
     super(scope, id, props);
 
     this.eventTablePK = 'id';
     this.subscriberTablePK = 'id';
+    this.subscriberTableSK = 'type';
 
     // DYNAMODB TABLE
     const eventNotificationsTable = new dynamodb.Table(this, "eventTable", {
@@ -29,6 +31,7 @@ export class DynamoDBStack extends cdk.Stack {
     const subscriberDetailsTable = new dynamodb.Table(this, "subscriberTable", {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       partitionKey: { name: this.subscriberTablePK, type: dynamodb.AttributeType.STRING },
+      sortKey: { name:this.subscriberTableSK, type: dynamodb.AttributeType.STRING },
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       stream: dynamodb.StreamViewType.NEW_IMAGE
     });
