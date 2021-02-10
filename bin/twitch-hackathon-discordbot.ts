@@ -5,6 +5,7 @@ import * as cdk from '@aws-cdk/core';
 import { EventSubStack } from '../lib/twitch-hackathon-event-sub-stack';
 import { CertStack } from '../lib/twitch-hackathon-certificate-stack';
 import { AuthWebsiteStack } from '../lib/twitch-hackathon-auth-cfn-stack';
+import { DynamoDBStack } from '../lib/twitch-hackathon-dynamodb-stack';
 import { hackathonConfig } from '../hackathon-config';
 
 const domainName = 'gizmo.codes';
@@ -20,12 +21,19 @@ const certifcate = new CertStack(app, 'twitch-hackathon-cert', {
     apiSubDomainName: apiSubDomain
   });
 
+const dynamodbStack = new DynamoDBStack(app, 'twitch-hackathon-dynamodb', {
+    env: {account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION}
+  });
+
 new EventSubStack(app, 'twitch-hackathon-event-sub', {
     env: {account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION},
+    eventTable: dynamodbStack.eventTable,
+    eventTablePK: dynamodbStack.eventTablePK,
+    subscriberTable: dynamodbStack.subscriberTable,
+    subscriberTablePK: dynamodbStack.subscriberTablePK,
     domainName: domainName,
     subDomainName: apiSubDomain,
     certificate: certifcate.apiCert,
-    twitchCallback: hackathonConfig.twitchCallback || process.env.TWITCH_CALLBACK + '',
     twitchClientId: hackathonConfig.twitchClientId || process.env.TWITCH_CLIENT_ID + '',
     twitchClientSecret: hackathonConfig.twitchClientSecret || process.env.TWITCH_CLIENT_SECRET + '',
     twitchEventSubSecret: hackathonConfig.twitchEventSubSecret || process.env.TWITCH_EVENT_SUB_SECRET + ''

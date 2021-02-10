@@ -1,77 +1,272 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <title>Twitch Implicit Auth Example</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Twitch Channel Point Hackathon Discord Bot</title>
+  <!-- MDB icon -->
+  <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="css/mdb.min.css" />
 </head>
+
 <body>
-    <p><a href="https://dev.twitch.tv/docs/authentication/getting-tokens-oauth#oauth-implicit-code-flow" target="_blank">Implicit Auth</a> is a way to get a <a href="https://dev.twitch.tv/docs/authentication#types-of-tokens" target="_blank">User Access Token</a> in a pure front end environment, it needs only a ClientID</p>
-    <p>Get the code for this example on <a href="https://github.com/BarryCarlyon/twitch_misc/tree/master/authentication/implicit_auth">Github</a> or just View the source instead</p>
-    <ul>
-        <li>
-            <a href="" id="authorize_public">Authorize and get Public data</a>
-        </li>
-        <li>
-            <a href="" id="authorize_email">Authorize and get public data + email</a>
-        </li>
-    </ul>
-    <div id="access_token"></div>
-    <div id="user_data"></div>
+  <!-- Start your project here-->
+  <header>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+      <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarExample01"
+          aria-controls="navbarExample01" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarExample01">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" aria-current="page" href="#">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="discordBot.html">Create Discord Bot</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://twitchchannelpoints.devpost.com/">Twicth Channel Point Hackathon</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Navbar -->
 
-    <script type="text/javascript">
-        // These are set for the GitHub Pages Example
-        // Substitute as needed
-        var client_id = 'f1g960pkimfxyugtmaoaztwxrx3df5';
-        var redirect = 'https://twitch-hackathon.gizmo.codes/';
+    <!-- Background image -->
+    <div class="p-5 text-center bg-image" style="
+          background-image: url('https://mdbootstrap.com/img/new/slides/041.jpg');
+          height: 400px;
+        ">
+      <div class="mask" style="background-color: rgba(0, 0, 0, 0.6)">
+        <div class="d-flex justify-content-center align-items-center h-100">
+          <div class="text-white">
+            <h1 class="mb-3">Heading</h1>
+            <h4 class="mb-3">Subheading</h4>
+            <a class="btn btn-outline-light btn-lg" href="#!" role="button">Call to action</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Background image -->
+  </header>
+  <main class="container" style="padding: 40px;">
+    <div class="container" id="savedSuccess">
+      <div class="row">
+        <h3>Saved</h3>
+        <p>Bot is now monitoring your channel point rewards!</p>
+      </div>
+    </div>
+    <div class="container" id="noAccess">
+      <div class="row">
+        <button id="authorizeAccess" type="button" class="btn btn-primary">Authorize Access to Twitch</button>
+      </div>
+    </div>
+    <div class="container" id="accessGranted">
+      <form>
+        <!-- Text input -->
+        <h5>Twitch Stream</h5>
+        <div class="mb-4">
+          <p>Twitch Channel Name: <span id="twitchChannelName">Unknown</span></label>
+          <p>Twitch Broadcaster ID: <span id="twitchBroadcasterID">Unknown</span></label>
+        </div>
+        <hr />
 
-        document.getElementById('authorize_public').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token');
-        document.getElementById('authorize_email').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=user:read:email');
-        document.getElementById('access_token').textContent = '';
+        <!-- Text input -->
+        <h5>Discord Access</h5>
+        <div class="form-outline mb-4">
+          <input type="text" id="discordBotToken" class="form-control" />
+          <label class="form-label" for="discordBotToken">Discord Bot Token</label>
+        </div>
 
-        if (document.location.hash && document.location.hash != '') {
-            var parsedHash = new URLSearchParams(window.location.hash.substr(1));
-            if (parsedHash.get('access_token')) {
-                var access_token = parsedHash.get('access_token');
-                document.getElementById('access_token').textContent = 'Your Access Key from the #url: ' + access_token;
+        <hr />
+        <h5>Discord Role Rewards</h5>
+        <!-- 2 column grid layout with text inputs for the first and last names -->
+        <div class="row mb-4" id="rewardRoleList">
+          <div class="row mb-4" id="discordRoleReward1">
+            <div class="col">
+              <div class="form-outline">
+                <input type="text" id="discordRoleName1" class="form-control" />
+                <label class="form-label" for="discordRoleName1">Role Name</label>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-outline">
+                <input type="text" id="twitchRewardId1" class="form-control" />
+                <label class="form-label" for="twitchRewardId1">Channel Points Reward Id</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Submit button -->
+        <button id="addRewardButton" type="button" class="btn btn-primary">Add Reward</button>
 
-                document.getElementById('user_data').textContent = 'Loading';
+        <hr />
 
-                // call API
-                fetch(
-                    'https://api.twitch.tv/helix/users',
-                    {
-                        "headers": {
-                            "Client-ID": client_id,
-                            "Authorization": "Bearer " + access_token
-                        }
-                    }
-                )
-                .then(resp => resp.json())
-                .then(resp => {
-                    document.getElementById('user_data').innerHTML = '<p>Your Public Twitch Profile from Helix:</p>';
-                    var table = document.createElement('table');
-                    document.getElementById('user_data').append(table);
-                    for (var key in resp.data[0]) {
-                        var tr = document.createElement('tr');
-                        table.append(tr);
-                        var td = document.createElement('td');
-                        td.textContent = key;
-                        tr.append(td);
-                        var td = document.createElement('td');
-                        td.textContent = resp.data[0][key];
-                        tr.append(td);
-                    }
-                })
-                .catch(err => {
-                    console.log(err);
-                    document.getElementById('user_data').textContent = 'Something went wrong';
-                });
+        <h5>Save</h5>
+        <button id="saveButton" type="button" class="btn btn-primary">Save</button>
+      </form>
+    </div>
+  </main>
+  <footer class="bg-light text-center text-lg-start">
+    <!-- Grid container -->
+    <div class="container p-4">
+      <!--Grid row-->
+      <div class="row">
+        <!--Grid column-->
+        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
+          <h5 class="text-uppercase">Footer text</h5>
+
+          <p>
+            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iste atque ea quis
+            molestias. Fugiat pariatur maxime quis culpa corporis vitae repudiandae
+            aliquam voluptatem veniam, est atque cumque eum delectus sint!
+          </p>
+        </div>
+        <!--Grid column-->
+
+        <!--Grid column-->
+        <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
+          <h5 class="text-uppercase">Footer text</h5>
+
+          <p>
+            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iste atque ea quis
+            molestias. Fugiat pariatur maxime quis culpa corporis vitae repudiandae
+            aliquam voluptatem veniam, est atque cumque eum delectus sint!
+          </p>
+        </div>
+        <!--Grid column-->
+      </div>
+      <!--Grid row-->
+    </div>
+    <!-- Grid container -->
+
+    <!-- Copyright -->
+    <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
+      © 2020 Copyright:
+      <a class="text-dark" href="https://mdbootstrap.com/">MDBootstrap.com</a>
+    </div>
+    <!-- Copyright -->
+  </footer>
+  <!-- End your project here-->
+
+
+  <!-- JQuery -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js">
+  </script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <!-- MDB -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+
+  <!-- Custom scripts -->
+  <script type="text/javascript">
+    $("#accessGranted").hide();
+    $("#savedSuccess").hide();
+
+    var client_id = 'f1g960pkimfxyugtmaoaztwxrx3df5';
+    var redirect = 'http://localhost/'; //'https://twitch-hackathon.gizmo.codes/';
+    var rewardCount = 1;
+
+    if (document.location.hash && document.location.hash != '' && window.location.hash.substr(1)) {
+      var parsedHash = new URLSearchParams(window.location.hash.substr(1));
+      if (parsedHash.get('access_token')) {
+        $("#noAccess").hide();
+        $("#accessGranted").show();
+        var access_token = parsedHash.get('access_token');
+        fetch('https://api.twitch.tv/helix/users',
+          {
+            "headers": {
+              "Client-ID": client_id,
+              "Authorization": "Bearer " + access_token
             }
-        } else if (document.location.search && document.location.search != '') {
-            var parsedParams = new URLSearchParams(window.location.search);
-            if (parsedParams.get('error_description')) {
-                document.getElementById('access_token').textContent = parsedParams.get('error') + ' - ' + parsedParams.get('error_description');
-            }
-        }
-            
-    </script>
+          }
+        )
+          .then(resp => resp.json())
+          .then(resp => {
+            $('#twitchChannelName').html('<a href="https://twitch.tv/' + resp.data[0]['login'] + '" id="twitchChannelNameLink">' + resp.data[0]['login'] + '</a>');
+            $('#twitchBroadcasterID').text(resp.data[0]['id']);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      } else {
+        $("#accessGranted").hide();
+      }
+    }
+    
+    $('#addRewardButton').on('click', function () {
+      rewardCount++;
+      var baseReward = $('#discordRoleReward1').clone();
+      baseReward.attr("id", "discordRoleReward" + rewardCount);
+      baseReward.find("#discordRoleName1").attr("id", "discordRoleName" + rewardCount);
+      baseReward.find("#discordRoleName" + rewardCount).val("");
+      baseReward.find("#discordRoleName" + rewardCount).next().attr("for", "discordRoleName" + rewardCount);
+      baseReward.find("#twitchRewardId1").attr("id", "twitchRewardId" + rewardCount);
+      baseReward.find("#twitchRewardId" + rewardCount).val("");
+      baseReward.find("#twitchRewardId" + rewardCount).next().attr("for", "twitchRewardId" + rewardCount);
+
+      $('#rewardRoleList').append(baseReward);
+    });
+
+    $('#authorizeAccess').on('click', function () {
+      window.location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token';
+    });
+
+    async function postData(url = '', data = {}) {
+          // Default options are marked with *
+          const response = await fetch(url, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'no-cors', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            redirect: 'follow', // manual, *follow, error
+            referrerPolicy: 'no-referrer',
+            body: JSON.stringify(data) // body data type must match "Content-Type" header
+          });
+
+          return 'OK';
+      }
+    
+    $('#saveButton').on('click', function () {
+
+      var rewardList = [];
+
+      for (var i = 0; i < rewardCount; i++) {
+        var rewardOption = {};
+        rewardOption['discordRoleName'] = $("#discordRoleName" + i).val();
+        rewardOption['twitchRewardId'] = $("#twitchRewardId" + i).val();
+        rewardList.push(rewardOption);
+      }
+      postData('https://twitch-hackathon-api.gizmo.codes/subscriptions', { 
+        type: 'subscribe', 
+        broadcasterUserId: $('#twitchBroadcasterID').text(), 
+        twitchChannelName: $('#twitchChannelNameLink').text(),
+        rewards: rewardList
+        })
+          .then(data => {
+            $("#accessGranted").hide();
+            $("#noAccess").hide();
+            $("#savedSuccess").show();
+          });
+    });
+  </script>
 </body>
+
 </html>
