@@ -49,6 +49,11 @@ exports.handler = async (event, context, callback) => {
     item['twitchEventSubMessageId'] = event.headers[twitchEventSubMessageId];
     item['twitchEventSubMessageTimestamp'] = event.headers[twitchEventSubMessageTimestamp];
     item['twitchEventSubMessage'] = userData;
+    if (userData.event) {
+      item['broadcaster_user_id'] = userData.event.broadcaster_user_id;
+      item['user_id'] = userData.event.user_id;
+      item['user_name'] = userData.event.user_name;
+    }
 
     const params = {
       TableName: TABLE_NAME,
